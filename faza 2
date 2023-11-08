@@ -1,0 +1,608 @@
+#include <iostream>
+
+using namespace std;
+
+//domeniul este cantina studenteasca iar obiectele sunt: meniu, bucatarie, student
+
+class meniu
+{
+private:
+	const int id;
+	string numeMeniu;
+	int nrElementeMeniu;
+	string* elementeMeniu;
+	float pret;
+	static string numeCantina;
+	static int nrTotalMeniuri;
+	
+public:
+	meniu() : id(nrTotalMeniuri++)
+	{
+		this->numeMeniu = "Meniu pui";
+		this->nrElementeMeniu = 0;
+		this->elementeMeniu = NULL;
+		this->pret = 20;
+	}
+
+	meniu(string numeMeniu, float pret) : id(nrTotalMeniuri++)
+	{
+		this->numeMeniu = numeMeniu;
+		this->nrElementeMeniu = 0;
+		this->elementeMeniu = NULL;
+		this->pret = pret;
+	}
+
+	meniu( string numeMeniu, int nrElementeMeniu, string* elementeMeniu, float pret) :id(nrTotalMeniuri++)
+	{
+		this->numeMeniu = numeMeniu;
+		this->nrElementeMeniu = nrElementeMeniu;
+		this->elementeMeniu = new string[nrElementeMeniu];
+		for (int i = 0; i < nrElementeMeniu; i++)
+			this->elementeMeniu[i] = elementeMeniu[i]; 
+		this->pret = pret;
+	}
+
+	~meniu()
+	{
+		if (this->elementeMeniu != NULL)
+			delete[]this->elementeMeniu;
+	}
+
+	meniu(const meniu& m) :id(nrTotalMeniuri++)
+	{
+		this->numeMeniu = m.numeMeniu;
+		this->nrElementeMeniu = m.nrElementeMeniu;
+		this->elementeMeniu = new string[m.nrElementeMeniu];
+		for (int i = 0; i < m.nrElementeMeniu; i++)
+			this->elementeMeniu[i] = m.elementeMeniu[i];
+		this->pret = m.pret;
+
+	}
+
+	const int  getId()
+	{
+		return id;
+	}
+
+	string getNumeMeniu()
+	{
+		return numeMeniu;
+	}
+
+	int getNrElementeMeniu()
+	{
+		return nrElementeMeniu;
+	}
+
+	string* getElementeMeniu()
+	{
+		return elementeMeniu;
+	}
+
+	float getPret()
+	{
+		return pret;
+	}
+
+	static string getNumeCantina()
+	{
+		return numeCantina;
+	}
+
+	static int getNrTotalMeniuri()
+	{
+		return nrTotalMeniuri-1;
+	}
+
+	void setPret(float pret)
+	{
+		if (pret>0)
+			this->pret = pret;
+	}
+
+	void setNumeMeniu(string numeMeniu)
+	{
+		this->numeMeniu = numeMeniu;
+	}
+
+	void setNrElementeMeniu(int nrElementeMeniu)
+	{
+		this->nrElementeMeniu = nrElementeMeniu;
+	}
+
+	void setElementeMeniu(int nrElMeniu, string* elMeniu)
+	{
+		if (nrElMeniu > 0)
+		{
+			this->nrElementeMeniu = nrElMeniu;
+			if (this->elementeMeniu != NULL)
+			{
+				delete[]this->elementeMeniu;
+			}
+			this->elementeMeniu = new string[nrElMeniu];
+			for (int i = 0; i < nrElMeniu; i++)
+				this->elementeMeniu[i] = elMeniu[i];
+		}
+	}
+
+
+	void afisareMeniu()
+	{
+		cout << "Meniul "<<id<<" de astazi de la "<<numeCantina<<" este: " << numeMeniu << " si costa "<<pret<<" lei. Acesta contine " << nrElementeMeniu << " preparate, care sunt: ";
+		if (nrElementeMeniu > 0)
+		{
+			for (int i = 0; i < nrElementeMeniu - 1; i++)
+				cout << elementeMeniu[i] << ", ";
+			cout << elementeMeniu[nrElementeMeniu-1];
+		}
+		else cout << "nu sunt disponibile informatii";
+		cout << endl;
+	}
+
+	void adaugareElementeMeniu(string numeElement)
+	{
+		string* aux = new string[this->nrElementeMeniu + 1];
+		for (int i = 1; i < this->nrElementeMeniu; i++)
+			aux[i] = this->elementeMeniu[i];
+		aux[this->nrElementeMeniu] = numeElement;
+		this->nrElementeMeniu++;
+		if (this->elementeMeniu)
+			delete[] this->elementeMeniu;
+		this->elementeMeniu = aux;
+	}
+
+	friend bool cautaElement(const meniu& m, string elemCautat);
+	
+};
+
+bool cautaElement(const meniu& m, string elemCautat)
+{
+	for (int i = 0; i < m.nrElementeMeniu; i++)
+	{
+		if (m.elementeMeniu[i] == elemCautat)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+string meniu::numeCantina = "Cantina Moxa";
+int meniu::nrTotalMeniuri = 1;
+
+class student
+{
+private:
+	const int nrMatricol;
+	string numeStudent;
+	static int nrTotalStudenti;
+	int nrPreferinte;
+	string* preferinteMancare;
+	float buget;
+	static int nrGenerator;
+
+
+public:
+
+	student() : nrMatricol(nrGenerator++)
+	{
+		this->numeStudent = "Popescu Andrei";
+		this->nrPreferinte = 0;
+		this->preferinteMancare = NULL;
+		this->buget = 30;
+		student::nrTotalStudenti++;
+	}
+
+	student( string numeStudent): nrMatricol(nrGenerator++)
+	{
+		this->numeStudent = numeStudent;
+		this->nrPreferinte = 0;
+		this->preferinteMancare = NULL;
+		this->buget = 40;
+		student::nrTotalStudenti++;
+	}
+
+	student( string numeStudent, int nrPreferinte, string* preferinteMancare, float buget) : nrMatricol(nrGenerator++)
+	{
+		this->numeStudent = numeStudent;
+		this->nrPreferinte = nrPreferinte;
+		this->preferinteMancare = new string[nrPreferinte];
+		for (int i = 0; i < nrPreferinte; i++)
+			this->preferinteMancare[i] = preferinteMancare[i];
+		this->buget = buget;
+		student::nrTotalStudenti++;
+	}
+
+	~student()
+	{
+		if (this->preferinteMancare != NULL)
+			delete[]this->preferinteMancare;
+	}
+
+	const int getNrMatricol()
+	{
+		return nrMatricol;
+	}
+
+	string getNumeStudent()
+	{
+		return numeStudent;
+	}
+
+	static int getNrStudenti()
+	{
+		return nrTotalStudenti;
+	}
+
+	static int getNrGenerator()
+	{
+		return nrGenerator-1;
+	}
+
+	int getNrPreferinte()
+	{
+		return nrPreferinte;
+	}
+
+	string* getPreferinteMancare()
+	{
+		return preferinteMancare;
+	}
+
+	float getBuget()
+	{
+		return buget;
+	}
+
+	void setNumeStudent(string numeStud)
+	{
+		this->numeStudent = numeStud;
+	}
+
+	void setNrPreferinte(int nrPref)
+	{
+		this->nrPreferinte = nrPref;
+	}
+
+	void setBuget(float b)
+	{
+		this->buget = b;
+	}
+
+	void setPreferinteMancare(int nrPref, string* pref)
+	{
+		if (nrPref > 0)
+		{
+			this->nrPreferinte = nrPref;
+			if (this->preferinteMancare != NULL)
+			{
+				delete[]this->preferinteMancare;
+			}
+			this->preferinteMancare = new string[nrPref];
+			for (int i = 0; i < nrPref; i++)
+				this->preferinteMancare[i] = pref[i];
+		}
+	}
+
+	student(const student &s) :nrMatricol(nrGenerator++)
+	{
+		this->numeStudent = s.numeStudent;
+		this->nrPreferinte = s.nrPreferinte;
+		this->preferinteMancare = new string[s.nrPreferinte];
+		for (int i = 0; i < nrPreferinte; i++)
+			this->preferinteMancare[i] = s.preferinteMancare[i];
+		this->buget = s.buget;
+		student::nrTotalStudenti++;
+	}
+
+	void afisareStudent()
+	{
+		cout << "Elevul " << numeStudent << " cu numarul matricol " << nrMatricol << " are un buget de " << buget << " si " << nrPreferinte << " preferinte la mancare: ";
+		if(nrPreferinte>0)
+		{
+			for (int i = 0; i < nrPreferinte - 1; i++)
+				cout << preferinteMancare[i] << ", ";
+			cout << preferinteMancare[nrPreferinte - 1];
+		}
+		else cout << "nu sunt disponibile informatii";
+		cout << endl;
+	}
+
+	void adaugarePreferinteMancare(string preparat)
+	{
+		string* aux = new string[this->nrPreferinte + 1];
+		for (int i = 0; i < this->nrPreferinte; i++)
+			aux[i] = this->preferinteMancare[i];
+		aux[nrPreferinte] = preparat;
+		this->nrPreferinte++;
+		if (this->preferinteMancare)
+			delete[] this->preferinteMancare;
+		this->preferinteMancare = aux;
+	}
+
+};
+
+int student::nrTotalStudenti = 1;
+int student::nrGenerator = 1000;
+
+class bucatarie
+{
+private:
+	const int codPostal;
+	string numeCantina;
+	int nrBucatari;
+	static int nrGenerator;
+	int nrMeniuriDisponibile;
+	string* meniuriDisponibile;
+	bool esteDeschisa;
+
+public:
+	bucatarie() :codPostal(nrGenerator++)
+	{
+		this->numeCantina = "Cantina Moxa";
+		this->nrBucatari = 10;
+		this->nrMeniuriDisponibile = 0;
+		this->meniuriDisponibile = NULL;
+		this->esteDeschisa = true;
+	}
+
+	bucatarie( string numeCantina) : codPostal(nrGenerator++)
+	{
+		this->numeCantina = numeCantina;
+		this->nrBucatari = 17;
+		this->nrMeniuriDisponibile = 0;
+		this->meniuriDisponibile = NULL;
+		this->esteDeschisa = false;
+	}
+
+	bucatarie( string numeCantina, int nrBucatari, int nrMeniuriDisponibile, string* meniuriDisponibile, bool esteDeschisa) : codPostal(nrGenerator++)
+	{
+		this->numeCantina = numeCantina;
+		this->nrBucatari = nrBucatari;
+		this->esteDeschisa = esteDeschisa;
+		this->nrMeniuriDisponibile = nrMeniuriDisponibile;
+		this->meniuriDisponibile = new string[nrMeniuriDisponibile];
+		for (int i = 0; i < nrMeniuriDisponibile; i++)
+			this->meniuriDisponibile[i] = meniuriDisponibile[i];
+	}
+
+	~bucatarie()
+	{
+		if (this->meniuriDisponibile != NULL)
+			delete[]this->meniuriDisponibile;
+	}
+
+	const int getCodPostal()
+	{
+		return codPostal;
+	}
+
+	string getNumeCantina()
+	{
+		return numeCantina;
+	}
+
+	int getNrBucatari()
+	{
+		return nrBucatari;
+	}
+
+	static int getNrGenerator()
+	{
+		return nrGenerator;
+	}
+
+	int getNrMeniuriDisponibile()
+	{
+		return nrMeniuriDisponibile;
+	}
+
+	string* getMeniuriDisponibile()
+	{
+		return meniuriDisponibile;
+	}
+
+	bool getEsteDeschisa()
+	{
+		return esteDeschisa;
+	}
+
+	void setNumeCantina(string nume)
+	{
+		this->numeCantina = nume;
+	}
+
+	void setNrBucatari(int buc)
+	{
+		this->nrBucatari = buc;
+	}
+
+	void setNrMeniuriDisponibile(int nr)
+	{
+		this->nrMeniuriDisponibile = nr;
+	}
+
+	void setMeniuriDisponibile(int nr, string* lista)
+	{
+		this->nrMeniuriDisponibile = nr;
+		if (this->meniuriDisponibile != NULL)
+			delete[]this->meniuriDisponibile;
+		this->meniuriDisponibile = new string[nr];
+		for (int i = 0; i < nr; i++)
+			this->meniuriDisponibile[i] = lista[i];
+	}
+
+	void setEsteDeschisa(bool deschis)
+	{
+		this->esteDeschisa = deschis;
+	}
+
+	bucatarie(const bucatarie& b) :codPostal(nrGenerator++)
+	{
+		this->numeCantina = b.numeCantina;
+		this->nrBucatari = b.nrBucatari;
+		this->esteDeschisa = b.esteDeschisa;
+		this->nrMeniuriDisponibile = b.nrMeniuriDisponibile;
+		this->meniuriDisponibile = new string[b.nrMeniuriDisponibile];
+		for (int i = 0; i < b.nrMeniuriDisponibile; i++)
+			this->meniuriDisponibile[i] = b.meniuriDisponibile[i];
+	}
+
+	void afisareBucatarii()
+	{
+		cout << "Bucataria de la " << numeCantina<<", cu codul postal "<<codPostal;
+		if (esteDeschisa) cout << " este deschisa astazi ";
+		else cout << " este inchisa astazi "; 
+		cout<<"si are " << nrBucatari << " bucatari care au pregatit " << nrMeniuriDisponibile << " meniuri: ";
+		if (nrMeniuriDisponibile > 0)
+		{
+			for (int i = 0; i < nrMeniuriDisponibile - 1; i++)
+				cout << meniuriDisponibile[i] << ", ";
+			cout << meniuriDisponibile[nrMeniuriDisponibile - 1];
+		}
+		else cout << "nu sunt disponibile informatii";
+		cout << endl;
+	}
+
+	void adaugaBucatari(int nrBucatariNou)
+	{
+		nrBucatari += nrBucatariNou;
+		cout << "Au fost adaugati " << nrBucatariNou << " bucatari, nr total fiind: "<<nrBucatari<<" ."<<endl;
+	}
+
+	void adaugareMeniuDisponibil(string meniuDisp)
+	{
+		string* aux = new string[this->nrMeniuriDisponibile + 1];
+		for (int i = 0; i < this->nrMeniuriDisponibile; i++)
+			aux[i] = this->meniuriDisponibile[i];
+		aux[nrMeniuriDisponibile] = meniuDisp;
+		this->nrMeniuriDisponibile++;
+		if (this->meniuriDisponibile)
+			delete[] this->meniuriDisponibile;
+		this->meniuriDisponibile = aux;
+	}
+	friend void randamentBucatari(const bucatarie& b,int nr);
+
+};
+
+void randamentBucatari(const bucatarie& b, int nr)
+{
+	int aux = b.nrBucatari * nr;
+	if (aux > b.nrMeniuriDisponibile) cout << "Bucatarii nu pregatesc meniurile suficient de repede.";
+	else cout << "Bucatarii pregatesc meniurile suficient de repede. ";
+}
+int bucatarie::nrGenerator = 25670;
+
+void main()
+{
+	meniu meniu1;
+	meniu1.afisareMeniu();
+
+	meniu meniu2("Meniu Porc", 23);
+	meniu2.adaugareElementeMeniu("Carne de porc");
+	meniu2.afisareMeniu();
+		
+	string* elemMeniu = new string[3];
+	elemMeniu[0] = "Snitel";
+	elemMeniu[1] = "Cartofi prajiti";
+	elemMeniu[2] = "Salata";
+	
+	meniu meniu3( "Meniu Snitel", 3, elemMeniu, 27);
+	meniu3.afisareMeniu();
+
+
+	meniu meniu4(meniu2);
+	meniu4.afisareMeniu();
+	cout << endl;
+
+	meniu4.setPret(50);
+	meniu4.setNrElementeMeniu(3);
+	meniu4.setNumeMeniu("Meniu aripioare");
+	string* elmeniu = new string[meniu4.getNrElementeMeniu()];
+	elmeniu[0] = "Piure";
+	elmeniu[1] = "Aripioare";
+	elmeniu[2] = "Muraturi";
+	meniu4.setElementeMeniu(meniu4.getNrElementeMeniu(),elmeniu);
+	cout << "Afisare cu get-eri: Meniul " << meniu4.getId() << " de astazi de la " << meniu4.getNumeCantina() << " este: " << meniu4.getNumeMeniu() << " si costa " << meniu4.getPret() << " lei. Acesta contine " << meniu4.getNrElementeMeniu() << " preparate, care sunt: ";
+	if (meniu4.getNrElementeMeniu() > 0)
+	{
+	for(int i=0; i<meniu4.getNrElementeMeniu(); i++)
+	cout << meniu4.getElementeMeniu()[i]<<", ";
+	}
+	cout << endl;
+
+	if (cautaElement(meniu2, "Carne de porc"))
+		cout << "am gasit elementul";
+	else cout << "nu am gasit elementul";
+
+	cout << endl<<meniu4.getNrTotalMeniuri();
+
+	cout << endl;
+
+	student student1;
+	student1.afisareStudent();
+
+	student student2("Costescu Mihai");
+	student2.adaugarePreferinteMancare("Carne de porc");
+	student2.afisareStudent();
+
+	string* preferinte = new string[2];
+	preferinte[0] = "Snitel";
+	preferinte[1] = "Salata";
+	student student3("Grozavescu Dorin", 2, preferinte, 37);
+	student3.afisareStudent();
+
+	student student4(student1);
+	student4.setNumeStudent("Mihailescu David");
+	student4.setNrPreferinte (0);
+	student4.setBuget(50);
+	student4.setNrPreferinte(2);
+	string* pref = new string[student4.getNrPreferinte()];
+	pref[0] = "Piept de pui";
+	pref[1] = "Salata";
+	student4.setPreferinteMancare(student4.getNrPreferinte(), pref);
+	cout<<"Afisare cu get-eri: Elevul " << student4.getNumeStudent() << " cu numarul matricol " << student4.getNrMatricol() << " are un buget de " << student4.getBuget() << " si " << student4.getNrPreferinte() << " preferinte la mancare: ";
+	if (student4.getNrPreferinte() > 0)
+	{
+		for (int i = 0; i < student4.getNrPreferinte() - 1; i++)
+			cout << student4.getPreferinteMancare()[i] << ", ";
+	}
+
+	cout << endl << "nr total de studenti: "<<student::getNrStudenti();
+	cout<<endl;
+
+	bucatarie bucatarie1;
+	bucatarie1.adaugareMeniuDisponibil("Meniu pui");
+	bucatarie1.afisareBucatarii();
+
+	bucatarie bucatarie2("Cantina Politehnica");
+	bucatarie2.afisareBucatarii();
+	bucatarie2.adaugaBucatari(2);
+
+	string* mancare = new string[3];
+	mancare[0] = "Meniu pui";
+	mancare[1] = "Meniu porc";
+	mancare[2] = "Meniu Snitel";
+	bucatarie bucatarie3( "Cantina Cihoschi", 20, 3, mancare, true);
+	bucatarie3.afisareBucatarii();
+
+	bucatarie bucatarie4(bucatarie3);
+	bucatarie4.setNrBucatari(12);
+	bucatarie4.setNrMeniuriDisponibile(1);
+	bucatarie4.setNumeCantina("Cantina Sportivilor");
+	string* lista = new string[bucatarie4.getNrMeniuriDisponibile()];
+	lista[0] = "Meniu Sarmale";
+	bucatarie4.setMeniuriDisponibile(bucatarie4.getNrMeniuriDisponibile(), lista);
+	bucatarie4.setEsteDeschisa(false);
+	cout << "Afisare cu get-eri: Bucataria de la " << bucatarie4.getNumeCantina() << ", cu codul postal " << bucatarie4.getCodPostal();
+	if (bucatarie4.getEsteDeschisa()) cout << " este deschisa astazi ";
+	else cout << " este inchisa astazi ";
+	cout << "si are " << bucatarie4.getNrBucatari() << " bucatari care au pregatit " << bucatarie4.getNrMeniuriDisponibile() << " meniuri: ";
+	if (bucatarie4.getNrMeniuriDisponibile() > 0)
+	{
+		for (int i = 0; i < bucatarie4.getNrMeniuriDisponibile() ; i++)
+			cout << bucatarie4.getMeniuriDisponibile()[i] << ", ";
+	}
+	cout << endl;
+	randamentBucatari(bucatarie1, 1);
+	
+}
