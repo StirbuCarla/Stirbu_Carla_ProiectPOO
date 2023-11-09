@@ -1,5 +1,5 @@
 #include <iostream>
-
+#include <string>
 using namespace std;
 
 //domeniul este cantina studenteasca iar obiectele sunt: meniu, bucatarie, student
@@ -152,8 +152,62 @@ public:
 	}
 
 	friend bool cautaElement(const meniu& m, string elemCautat);
+
+	meniu& operator=(const meniu& m)
+	{
+		if (this != &m)
+		{
+			this->numeMeniu = m.numeMeniu;
+			this->nrElementeMeniu = m.nrElementeMeniu;
+			this->pret = m.pret;
+			if (this->elementeMeniu != NULL)
+			{
+				delete[]this->elementeMeniu;
+			}
+			this->elementeMeniu = new string[this->nrElementeMeniu];
+			for (int i = 0; i < this->nrElementeMeniu; i++)
+				this->elementeMeniu[i] = m.elementeMeniu[i];
+		}
+		return *this;
+	}
 	
+	bool operator!=(const meniu& m)
+	{
+		return this->pret != m.pret && this->nrElementeMeniu != m.nrElementeMeniu;
+	}
+
+	friend istream& operator>>(istream& tastatura, meniu& m)
+	{
+		cout << "Numele meniului: ";
+		getline(tastatura, m.numeMeniu);
+		cout << "Numarul de elemente din meniu: ";
+		tastatura >> m.nrElementeMeniu;
+		cout << "Elementele meniului: ";
+		if (m.elementeMeniu != NULL)
+			delete[]m.elementeMeniu;
+		m.elementeMeniu = new string[m.nrElementeMeniu];
+		for (int i = 0; i < m.nrElementeMeniu; i++)
+			tastatura >> m.elementeMeniu[i];
+		cout << "Pretul: ";
+		tastatura >> m.pret;
+
+		return tastatura;
+	}
+	friend ostream& operator<<(ostream& ecran, const meniu& m);
 };
+
+ostream& operator<<(ostream& ecran, const meniu& m)
+{
+	ecran << "Meniul " << m.id << " de astazi de la " << m.numeCantina << " este: " << m.numeMeniu << " si costa " << m.pret << " lei. Acesta contine " << m.nrElementeMeniu << " preparate, care sunt: ";
+	if (m.nrElementeMeniu > 0)
+	{
+		for (int i = 0; i <m. nrElementeMeniu - 1; i++)
+			ecran << m.elementeMeniu[i] << ", ";
+		ecran << m.elementeMeniu[m.nrElementeMeniu - 1];
+	}
+	else ecran << "nu sunt disponibile informatii";
+	return ecran;
+}
 
 bool cautaElement(const meniu& m, string elemCautat)
 {
@@ -319,6 +373,57 @@ public:
 		this->preferinteMancare = aux;
 	}
 
+	student& operator=(const student& s)
+	{
+		if (this != &s)
+		{
+			this->numeStudent = s.numeStudent;
+			this->nrPreferinte = s.nrPreferinte;
+			this->buget = s.buget;
+			if (this->preferinteMancare != NULL)
+			{
+				delete[]this->preferinteMancare;
+			}
+			this->preferinteMancare = new string[this->nrPreferinte];
+			for (int i = 0; i < this->nrPreferinte; i++)
+				this->preferinteMancare[i] = s.preferinteMancare[i];
+
+		}
+
+		return *this;
+	}
+
+	string& operator[](int i)
+	{
+		if (i >= 0 && i < nrPreferinte)
+			return preferinteMancare[i];
+	}
+	student operator+(float marire) 
+	{
+		student aux = *this;
+		aux.buget = this->buget + marire;
+		return aux;
+	}
+
+	friend student operator+(float marire, const student& s)
+	{
+		student aux = s;
+		aux.buget = marire + s.buget;
+		return aux;
+	}
+
+	student operator+(student s)
+	{
+		student aux = *this;
+		aux.buget = this->buget + s.buget;
+		return aux;
+	}
+
+	bool operator>(student s)
+	{
+		return this->buget > s.buget;
+	}
+
 };
 
 int student::nrTotalStudenti = 1;
@@ -482,6 +587,55 @@ public:
 	}
 	friend void randamentBucatari(const bucatarie& b,int nr);
 
+	bucatarie& operator=(const bucatarie& b)
+	{
+		if (this != &b)
+		{
+			this->numeCantina = b.numeCantina;
+			this->nrBucatari = b.nrBucatari;
+			this->nrMeniuriDisponibile = b.nrMeniuriDisponibile;
+			this->esteDeschisa = b.esteDeschisa;
+			if (this->meniuriDisponibile != NULL)
+			{
+				delete[]this->meniuriDisponibile;
+			}
+			this->meniuriDisponibile = new string[this->nrMeniuriDisponibile];
+			for (int i= 0; i < this->nrMeniuriDisponibile; i++)
+			{
+				this->meniuriDisponibile[i] = b.meniuriDisponibile[i];
+			}
+		}
+		return *this;
+	}
+
+
+	bucatarie operator!() const
+	{
+		bucatarie aux = *this;
+		aux.esteDeschisa = !aux.esteDeschisa;
+		return aux;
+	}
+
+	bucatarie operator++()
+	{
+		this->nrBucatari++;
+		return *this;
+	}
+
+	bucatarie operator++(int)
+	{
+		bucatarie aux = *this;
+		this->nrBucatari++;
+		return aux;
+	}
+
+	bucatarie operator+=(const bucatarie& b)
+
+	{
+		this->nrBucatari += b.nrBucatari;
+		return *this;
+	}
+
 };
 
 void randamentBucatari(const bucatarie& b, int nr)
@@ -534,7 +688,18 @@ void main()
 		cout << "am gasit elementul";
 	else cout << "nu am gasit elementul";
 
-	cout << endl<<meniu4.getNrTotalMeniuri();
+	cout << endl<<meniu4.getNrTotalMeniuri()<<endl;
+
+	meniu meniu5 = meniu2;
+	meniu5.afisareMeniu();
+
+	if (meniu1 != meniu1)
+		cout << "Meniurile sunt diferite." << endl;
+	else cout << "Meniurile sunt identice." << endl;
+
+	meniu meniu6;
+	cin >> meniu6;
+	cout << meniu6;
 
 	cout << endl;
 
@@ -570,6 +735,24 @@ void main()
 	cout << endl << "nr total de studenti: "<<student::getNrStudenti();
 	cout<<endl;
 
+	student student5 = student2;
+	student5.afisareStudent();
+	cout << "Preferinta nr 2 a studentului "<<student3.getNumeStudent()<< " este:" << student3[1] << endl;
+	student5 = student2 + 20;
+	student5.afisareStudent();
+	cout << endl;
+	student5 = 20 + student2;
+	student5.afisareStudent();
+	cout << endl;
+	student5 = student1 + student2;
+	student5.afisareStudent();
+	cout << endl;
+	if (student1 > student2)
+		cout << "Studentul 1 are un buget mai mare decat studentul 2.";
+	else cout << "Studentul 2 are un buget mai mare decat studentul 1.";
+	
+	cout << endl;
+
 	bucatarie bucatarie1;
 	bucatarie1.adaugareMeniuDisponibil("Meniu pui");
 	bucatarie1.afisareBucatarii();
@@ -604,5 +787,29 @@ void main()
 	}
 	cout << endl;
 	randamentBucatari(bucatarie1, 1);
+	cout << endl;
+
+	bucatarie bucatarie5 = bucatarie2;
+	bucatarie5.afisareBucatarii();
+	cout << endl;
+
+	
+	bucatarie bucatarie6;
+	bucatarie6= bucatarie2++;
+	cout << "Postincrementare: " << endl;
+	cout<<bucatarie6.getNrBucatari()<<" ";
+	cout<<bucatarie2.getNrBucatari()<<endl;
+	bucatarie bucatarie7;
+	bucatarie7 = ++bucatarie2;
+	cout << "Preincrementare: " << endl;
+	cout<<bucatarie7.getNrBucatari()<<" ";
+	cout<<bucatarie2.getNrBucatari()<<endl;
+
+	bucatarie bucatarie8 = !bucatarie2;
+	bucatarie8.afisareBucatarii();
+
+	bucatarie3+= bucatarie1;
+	bucatarie3.afisareBucatarii();
+
 	
 }
