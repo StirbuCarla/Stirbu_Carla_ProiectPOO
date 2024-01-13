@@ -12,7 +12,6 @@ private:
 	int nrElementeMeniu;
 	string* elementeMeniu;
 	float pret;
-	static string numeCantina;
 	static int nrTotalMeniuri;
 
 public:
@@ -84,10 +83,6 @@ public:
 		return pret;
 	}
 
-	static string getNumeCantina()
-	{
-		return numeCantina;
-	}
 
 	static int getNrTotalMeniuri()
 	{
@@ -128,7 +123,7 @@ public:
 
 	void afisareMeniu()
 	{
-		cout << "Meniul " << id << " de astazi de la " << numeCantina << " este: " << numeMeniu << " si costa " << pret << " lei. Acesta contine " << nrElementeMeniu << " preparate, care sunt: ";
+		cout << "Meniul " << id << " de astazi este: " << numeMeniu << " si costa " << pret << " lei. Acesta contine " << nrElementeMeniu << " preparate, care sunt: ";
 		if (nrElementeMeniu > 0)
 		{
 			for (int i = 0; i < nrElementeMeniu - 1; i++)
@@ -199,7 +194,7 @@ public:
 
 ostream& operator<<(ostream& ecran, const meniu& m)
 {
-	ecran << "Meniul " << m.id << " de astazi de la " << m.numeCantina << " este: " << m.numeMeniu << " si costa " << m.pret << " lei. Acesta contine " << m.nrElementeMeniu << " preparate, care sunt: ";
+	ecran << "Meniul " << m.id << " de astazi este: " << m.numeMeniu << " si costa " << m.pret << " lei. Acesta contine " << m.nrElementeMeniu << " preparate, care sunt: ";
 	if (m.nrElementeMeniu > 0)
 	{
 		for (int i = 0; i < m.nrElementeMeniu - 1; i++)
@@ -221,8 +216,8 @@ bool cautaElement(const meniu& m, string elemCautat)
 	}
 	return false;
 }
-string meniu::numeCantina = "Cantina Moxa";
 int meniu::nrTotalMeniuri = 1;
+
 
 class student
 {
@@ -374,6 +369,7 @@ public:
 		this->preferinteMancare = aux;
 	}
 
+
 	student& operator=(const student& s)
 	{
 		if (this != &s)
@@ -460,6 +456,74 @@ public:
 
 int student::nrTotalStudenti = 1;
 int student::nrGenerator = 1000;
+
+class grupa {
+private:
+	int nrStudenti;
+	student* studentGrupa;
+public:
+	grupa()
+	{
+		nrStudenti = 3;
+		studentGrupa = new student[3];
+	}
+	~grupa() 
+	{
+		delete[] studentGrupa;
+	}
+	grupa(const grupa& g) : nrStudenti(g.nrStudenti) {
+		studentGrupa = new student[nrStudenti];
+		for (int i = 0; i < nrStudenti; ++i) {
+			studentGrupa[i] = g.studentGrupa[i];
+		}
+	}
+
+	grupa& operator=(const grupa& g)
+	{
+		if (this != &g)
+		{
+			this->nrStudenti = g.nrStudenti;
+			for (int i = 0; i < nrStudenti; ++i) {
+				this->studentGrupa[i] = g.studentGrupa[i];
+			}
+		}
+		return *this;
+	}
+	student& operator[](int index)
+	{
+		if (index >= 0 && index < this->nrStudenti)
+			return studentGrupa[index];
+	}
+	int getNrStudenti()
+	{
+		return nrStudenti;
+	}
+	student* getStudentGrupa() const {
+		return studentGrupa;
+	}
+	void setNrStudenti(int nr)
+	{
+		this->nrStudenti = nr;
+	}
+	void setStudentGrupa(student* newStudentGrupa) {
+
+		delete[] studentGrupa;
+		studentGrupa = newStudentGrupa;
+	}
+
+	friend ostream& operator<<(ostream& out, const grupa& g)
+	{
+		out << "nr studenti: ";
+		out << g.nrStudenti << endl;
+		for (int i = 0; i < g.nrStudenti; i++)
+		{
+			out << "studentul " << i + 1 << " :";
+			out << g.studentGrupa[i];
+			out << endl;
+		}
+		return out;
+	}
+};
 
 class bucatarie
 {
@@ -748,7 +812,7 @@ void main()
 	elmeniu[1] = "Aripioare";
 	elmeniu[2] = "Muraturi";
 	meniu4.setElementeMeniu(meniu4.getNrElementeMeniu(), elmeniu);
-	cout << "Afisare cu get-eri: Meniul " << meniu4.getId() << " de astazi de la " << meniu4.getNumeCantina() << " este: " << meniu4.getNumeMeniu() << " si costa " << meniu4.getPret() << " lei. Acesta contine " << meniu4.getNrElementeMeniu() << " preparate, care sunt: ";
+	cout << "Afisare cu get-eri: Meniul " << meniu4.getId() << " de astazi este: " << meniu4.getNumeMeniu() << " si costa " << meniu4.getPret() << " lei. Acesta contine " << meniu4.getNrElementeMeniu() << " preparate, care sunt: ";
 	if (meniu4.getNrElementeMeniu() > 0)
 	{
 		for (int i = 0; i < meniu4.getNrElementeMeniu(); i++)
@@ -769,9 +833,9 @@ void main()
 		cout << "Meniurile sunt diferite." << endl;
 	else cout << "Meniurile sunt identice." << endl;
 
-	meniu meniu6;
+	/*meniu meniu6;
 	cin >> meniu6;
-	cout << meniu6;
+	cout << meniu6;*/
 
 	cout << endl;
 
@@ -931,5 +995,23 @@ void main()
 	for (int i = 0; i < numarBucatarii; i++) {
 		cout << vectorB[i] << endl;
 	}
+
+
+	cout << endl<<endl;
+	//faza 5
+	grupa grupa1;
+	grupa1[0] = student1;
+	grupa1[1] = student2;
+	grupa1[2] = student3;
+	cout << grupa1;
+	grupa1.setNrStudenti(2);
+	student* vectorStud = new student[2];
+	vectorStud[0] = student2;
+	vectorStud[1] = student1;
+	grupa1.setStudentGrupa(vectorStud);
+	cout << grupa1;
+	grupa grupa2;
+	grupa2 = grupa1;
+	cout << grupa2;
 
 }
