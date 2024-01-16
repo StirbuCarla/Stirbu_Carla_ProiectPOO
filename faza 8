@@ -295,6 +295,13 @@ public:
 		else out << " nu contine tofu";
 		return out;
 	}
+	friend ofstream& operator<<(ofstream& out, const meniuVegetarian v)
+	{
+		out << (meniu)v;
+		out << endl;
+		if (v.contineTofu) out << " Meniul contine tofu.";
+		else out << "Meniul  nu contine tofu.";
+		return out;
 	 string tipMeniu()
 	{
 		return "acesta este un meniu vegetarian";
