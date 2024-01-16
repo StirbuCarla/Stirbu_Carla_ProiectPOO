@@ -1,0 +1,1093 @@
+#include <iostream>
+#include <string>
+#include <fstream>
+using namespace std;
+
+//domeniul este cantina studenteasca iar obiectele sunt: meniu, bucatarie, student
+
+class meniuAbstract 
+{
+public:
+	virtual string tipMeniu() = 0; 
+};
+
+class meniu : public meniuAbstract
+{
+private:
+	const int id;
+	string numeMeniu;
+	int nrElementeMeniu;
+	string* elementeMeniu;
+	float pret;
+	static int nrTotalMeniuri;
+
+public:
+	meniu() : id(nrTotalMeniuri++)
+	{
+		this->numeMeniu = "Meniu pui";
+		this->nrElementeMeniu = 0;
+		this->elementeMeniu = NULL;
+		this->pret = 20;
+	}
+
+	meniu(string numeMeniu, float pret) : id(nrTotalMeniuri++)
+	{
+		this->numeMeniu = numeMeniu;
+		this->nrElementeMeniu = 0;
+		this->elementeMeniu = NULL;
+		this->pret = pret;
+	}
+
+	meniu(string numeMeniu, int nrElementeMeniu, string* elementeMeniu, float pret) :id(nrTotalMeniuri++)
+	{
+		this->numeMeniu = numeMeniu;
+		this->nrElementeMeniu = nrElementeMeniu;
+		this->elementeMeniu = new string[nrElementeMeniu];
+		for (int i = 0; i < nrElementeMeniu; i++)
+			this->elementeMeniu[i] = elementeMeniu[i];
+		this->pret = pret;
+	}
+
+	~meniu()
+	{
+		if (this->elementeMeniu != NULL)
+			delete[]this->elementeMeniu;
+	}
+
+	meniu(const meniu& m) :id(nrTotalMeniuri++)
+	{
+		this->numeMeniu = m.numeMeniu;
+		this->nrElementeMeniu = m.nrElementeMeniu;
+		this->elementeMeniu = new string[m.nrElementeMeniu];
+		for (int i = 0; i < m.nrElementeMeniu; i++)
+			this->elementeMeniu[i] = m.elementeMeniu[i];
+		this->pret = m.pret;
+
+	}
+
+	const int  getId()
+	{
+		return id;
+	}
+
+	string getNumeMeniu()
+	{
+		return numeMeniu;
+	}
+
+	int getNrElementeMeniu()
+	{
+		return nrElementeMeniu;
+	}
+
+	string* getElementeMeniu()
+	{
+		return elementeMeniu;
+	}
+
+	float getPret()
+	{
+		return pret;
+	}
+
+
+	static int getNrTotalMeniuri()
+	{
+		return nrTotalMeniuri - 1;
+	}
+
+	void setPret(float pret)
+	{
+		if (pret > 0)
+			this->pret = pret;
+	}
+
+	void setNumeMeniu(string numeMeniu)
+	{
+		this->numeMeniu = numeMeniu;
+	}
+
+	void setNrElementeMeniu(int nrElementeMeniu)
+	{
+		this->nrElementeMeniu = nrElementeMeniu;
+	}
+
+	void setElementeMeniu(int nrElMeniu, string* elMeniu)
+	{
+		if (nrElMeniu > 0)
+		{
+			this->nrElementeMeniu = nrElMeniu;
+			if (this->elementeMeniu != NULL)
+			{
+				delete[]this->elementeMeniu;
+			}
+			this->elementeMeniu = new string[nrElMeniu];
+			for (int i = 0; i < nrElMeniu; i++)
+				this->elementeMeniu[i] = elMeniu[i];
+		}
+	}
+
+
+	void afisareMeniu()
+	{
+		cout << "Meniul " << id << " de astazi este: " << numeMeniu << " si costa " << pret << " lei. Acesta contine " << nrElementeMeniu << " preparate, care sunt: ";
+		if (nrElementeMeniu > 0)
+		{
+			for (int i = 0; i < nrElementeMeniu - 1; i++)
+				cout << elementeMeniu[i] << ", ";
+			cout << elementeMeniu[nrElementeMeniu - 1];
+		}
+		else cout << "nu sunt disponibile informatii";
+		cout << endl;
+	}
+
+	void adaugareElementeMeniu(string numeElement)
+	{
+		string* aux = new string[this->nrElementeMeniu + 1];
+		for (int i = 1; i < this->nrElementeMeniu; i++)
+			aux[i] = this->elementeMeniu[i];
+		aux[this->nrElementeMeniu] = numeElement;
+		this->nrElementeMeniu++;
+		if (this->elementeMeniu)
+			delete[] this->elementeMeniu;
+		this->elementeMeniu = aux;
+	}
+
+	friend bool cautaElement(const meniu& m, string elemCautat);
+
+	meniu& operator=(const meniu& m)
+	{
+		if (this != &m)
+		{
+			this->numeMeniu = m.numeMeniu;
+			this->nrElementeMeniu = m.nrElementeMeniu;
+			this->pret = m.pret;
+			if (this->elementeMeniu != NULL)
+			{
+				delete[]this->elementeMeniu;
+			}
+			this->elementeMeniu = new string[this->nrElementeMeniu];
+			for (int i = 0; i < this->nrElementeMeniu; i++)
+				this->elementeMeniu[i] = m.elementeMeniu[i];
+		}
+		return *this;
+	}
+
+	bool operator!=(const meniu& m)
+	{
+		return this->pret != m.pret && this->nrElementeMeniu != m.nrElementeMeniu;
+	}
+
+	friend istream& operator>>(istream& tastatura, meniu& m)
+	{
+		cout << "Numele meniului: ";
+		tastatura >> m.numeMeniu;
+		cout << "Numarul de elemente din meniu: ";
+		tastatura >> m.nrElementeMeniu;
+		cout << "Elementele meniului: ";
+		if (m.elementeMeniu != NULL)
+			delete[]m.elementeMeniu;
+		m.elementeMeniu = new string[m.nrElementeMeniu];
+		for (int i = 0; i < m.nrElementeMeniu; i++)
+			tastatura >> m.elementeMeniu[i];
+		cout << "Pretul: ";
+		tastatura >> m.pret;
+
+		return tastatura;
+	}
+	friend ifstream& operator>>(ifstream& in, meniu& m)
+	{
+		in >> m.numeMeniu;
+		in >> m.nrElementeMeniu;
+		if (m.elementeMeniu != NULL)
+			delete[]m.elementeMeniu;
+		m.elementeMeniu = new string[m.nrElementeMeniu];
+		for (int i = 0; i < m.nrElementeMeniu; i++)
+			in >> m.elementeMeniu[i];
+		in >> m.pret;
+
+		return in;
+	}
+	friend ostream& operator<<(ostream& ecran, const meniu& m);
+	friend ofstream& operator<<(ofstream& out, const meniu& m)
+	{
+		out << "Meniul " << m.id << " de astazi este: " << m.numeMeniu << " si costa " << m.pret << " lei. Acesta contine " << m.nrElementeMeniu << " preparate, care sunt: ";
+		if (m.nrElementeMeniu > 0)
+		{
+			for (int i = 0; i < m.nrElementeMeniu - 1; i++)
+				out << m.elementeMeniu[i] << ", ";
+			out << m.elementeMeniu[m.nrElementeMeniu - 1];
+		}
+		else out << "nu sunt disponibile informatii";
+		return out;
+	}
+	string tipMeniu()
+	{
+		return "acesta este un meniu simplu";
+	}
+	
+};
+
+ostream& operator<<(ostream& ecran, const meniu& m)
+{
+	ecran << "Meniul " << m.id << " de astazi este: " << m.numeMeniu << " si costa " << m.pret << " lei. Acesta contine " << m.nrElementeMeniu << " preparate, care sunt: ";
+	if (m.nrElementeMeniu > 0)
+	{
+		for (int i = 0; i < m.nrElementeMeniu - 1; i++)
+			ecran << m.elementeMeniu[i] << ", ";
+		ecran << m.elementeMeniu[m.nrElementeMeniu - 1];
+	}
+	else ecran << "nu sunt disponibile informatii";
+	return ecran;
+}
+
+bool cautaElement(const meniu& m, string elemCautat)
+{
+	for (int i = 0; i < m.nrElementeMeniu; i++)
+	{
+		if (m.elementeMeniu[i] == elemCautat)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+int meniu::nrTotalMeniuri = 1;
+
+
+class meniuVegetarian : public meniu/*, public meniuAbstract*/ {
+private:
+	bool contineTofu;
+
+public:
+	meniuVegetarian() : meniu()
+	{
+		this->contineTofu = false;
+	}
+
+	meniuVegetarian(string numeMeniu, int nrElementeMeniu, string* elementeMeniu, float pret, bool contineTofu)
+		: meniu(numeMeniu, nrElementeMeniu, elementeMeniu, pret) {
+		this->contineTofu = contineTofu;
+	}
+
+	bool getContineTofu() const {
+		return contineTofu;
+	}
+
+	void setContineTofu(bool tofu) {
+		contineTofu = tofu;
+	}
+	friend ostream& operator<<(ostream& out, const meniuVegetarian v  )
+	{
+		out << (meniu)v;
+		out << endl;
+		if (v.contineTofu) out << " Meniul contine tofu.";
+		else out << "Meniul  nu contine tofu.";
+		return out;
+	}
+	friend ofstream& operator<<(ofstream& out, const meniuVegetarian v)
+	{
+		out << (meniu)v;
+		out << endl;
+		if (v.contineTofu) out << " Meniul contine tofu.";
+		else out << "Meniul  nu contine tofu.";
+		return out;
+	}
+	 string tipMeniu()
+	{
+		return "acesta este un meniu vegetarian";
+	}
+
+};
+
+
+class student
+{
+private:
+	const int nrMatricol;
+	string numeStudent;
+	static int nrTotalStudenti;
+	int nrPreferinte;
+	string* preferinteMancare;
+	float buget;
+	static int nrGenerator;
+
+
+public:
+
+	student() : nrMatricol(nrGenerator++)
+	{
+		this->numeStudent = "Popescu Andrei";
+		this->nrPreferinte = 0;
+		this->preferinteMancare = NULL;
+		this->buget = 30;
+		student::nrTotalStudenti++;
+	}
+
+	student(string numeStudent) : nrMatricol(nrGenerator++)
+	{
+		this->numeStudent = numeStudent;
+		this->nrPreferinte = 0;
+		this->preferinteMancare = NULL;
+		this->buget = 40;
+		student::nrTotalStudenti++;
+	}
+
+	student(string numeStudent, int nrPreferinte, string* preferinteMancare, float buget) : nrMatricol(nrGenerator++)
+	{
+		this->numeStudent = numeStudent;
+		this->nrPreferinte = nrPreferinte;
+		this->preferinteMancare = new string[nrPreferinte];
+		for (int i = 0; i < nrPreferinte; i++)
+			this->preferinteMancare[i] = preferinteMancare[i];
+		this->buget = buget;
+		student::nrTotalStudenti++;
+	}
+
+	~student()
+	{
+		if (this->preferinteMancare != NULL)
+			delete[]this->preferinteMancare;
+	}
+
+	const int getNrMatricol()
+	{
+		return nrMatricol;
+	}
+
+	string getNumeStudent()
+	{
+		return numeStudent;
+	}
+
+	static int getNrStudenti()
+	{
+		return nrTotalStudenti;
+	}
+
+	static int getNrGenerator()
+	{
+		return nrGenerator - 1;
+	}
+
+	int getNrPreferinte()
+	{
+		return nrPreferinte;
+	}
+
+	string* getPreferinteMancare()
+	{
+		return preferinteMancare;
+	}
+
+	float getBuget()
+	{
+		return buget;
+	}
+
+	void setNumeStudent(string numeStud)
+	{
+		this->numeStudent = numeStud;
+	}
+
+	void setNrPreferinte(int nrPref)
+	{
+		this->nrPreferinte = nrPref;
+	}
+
+	void setBuget(float b)
+	{
+		this->buget = b;
+	}
+
+	void setPreferinteMancare(int nrPref, string* pref)
+	{
+		if (nrPref > 0)
+		{
+			this->nrPreferinte = nrPref;
+			if (this->preferinteMancare != NULL)
+			{
+				delete[]this->preferinteMancare;
+			}
+			this->preferinteMancare = new string[nrPref];
+			for (int i = 0; i < nrPref; i++)
+				this->preferinteMancare[i] = pref[i];
+		}
+	}
+
+	student(const student& s) :nrMatricol(nrGenerator++)
+	{
+		this->numeStudent = s.numeStudent;
+		this->nrPreferinte = s.nrPreferinte;
+		this->preferinteMancare = new string[s.nrPreferinte];
+		for (int i = 0; i < nrPreferinte; i++)
+			this->preferinteMancare[i] = s.preferinteMancare[i];
+		this->buget = s.buget;
+		student::nrTotalStudenti++;
+	}
+
+	void afisareStudent()
+	{
+		cout << "Elevul " << numeStudent << " cu numarul matricol " << nrMatricol << " are un buget de " << buget << " si " << nrPreferinte << " preferinte la mancare: ";
+		if (nrPreferinte > 0)
+		{
+			for (int i = 0; i < nrPreferinte - 1; i++)
+				cout << preferinteMancare[i] << ", ";
+			cout << preferinteMancare[nrPreferinte - 1];
+		}
+		else cout << "nu sunt disponibile informatii";
+		cout << endl;
+	}
+
+	void adaugarePreferinteMancare(string preparat)
+	{
+		string* aux = new string[this->nrPreferinte + 1];
+		for (int i = 0; i < this->nrPreferinte; i++)
+			aux[i] = this->preferinteMancare[i];
+		aux[nrPreferinte] = preparat;
+		this->nrPreferinte++;
+		if (this->preferinteMancare)
+			delete[] this->preferinteMancare;
+		this->preferinteMancare = aux;
+	}
+
+
+	student& operator=(const student& s)
+	{
+		if (this != &s)
+		{
+			this->numeStudent = s.numeStudent;
+			this->nrPreferinte = s.nrPreferinte;
+			this->buget = s.buget;
+			if (this->preferinteMancare != NULL)
+			{
+				delete[]this->preferinteMancare;
+			}
+			this->preferinteMancare = new string[this->nrPreferinte];
+			for (int i = 0; i < this->nrPreferinte; i++)
+				this->preferinteMancare[i] = s.preferinteMancare[i];
+
+		}
+
+		return *this;
+	}
+
+	string& operator[](int i)
+	{
+		if (i >= 0 && i < nrPreferinte)
+			return preferinteMancare[i];
+	}
+	student operator+(float marire)
+	{
+		student aux = *this;
+		aux.buget = this->buget + marire;
+		return aux;
+	}
+
+	friend student operator+(float marire, const student& s)
+	{
+		student aux = s;
+		aux.buget = marire + s.buget;
+		return aux;
+	}
+
+	student operator+(student s)
+	{
+		student aux = *this;
+		aux.buget = this->buget + s.buget;
+		return aux;
+	}
+
+	bool operator>(student s)
+	{
+		return this->buget > s.buget;
+	}
+
+	friend istream& operator>>(istream& in, student& s)
+	{
+		cout << "Numele studentului: ";
+		in >> s.numeStudent;
+		cout << "Numarul de preferinte: ";
+		in >> s.nrPreferinte;
+		if (s.preferinteMancare != NULL)
+			delete[] s.preferinteMancare;
+		cout << "Preferinte: ";
+		s.preferinteMancare = new string[s.nrPreferinte];
+		for (int i = 0; i < s.nrPreferinte; i++)
+		{
+			in >> s.preferinteMancare[i];
+		}
+		cout << "Buget: ";
+		in >> s.buget;
+		return in;
+	}
+	friend ostream& operator<<(ostream& out, const student& s)
+	{
+		out << "Elevul " << s.numeStudent << " cu numarul matricol " << s.nrMatricol << " are un buget de " << s.buget << " si " << s.nrPreferinte << " preferinte la mancare: ";
+		if (s.nrPreferinte > 0)
+		{
+			for (int i = 0; i < s.nrPreferinte - 1; i++)
+				out << s.preferinteMancare[i] << ", ";
+			out << s.preferinteMancare[s.nrPreferinte - 1];
+		}
+		else out << "nu sunt disponibile informatii";
+
+		return out;
+	}
+
+	void scrieInFisierBinar(fstream& f)
+	{
+		f.write((char*)(&this->nrMatricol), sizeof(int));
+		int lungimeNume = this->numeStudent.length();
+		f.write((char*)&lungimeNume, sizeof(int));
+		f.write(this->numeStudent.c_str(), lungimeNume);
+		f.write((char*)(&this->nrPreferinte), sizeof(int));
+		for (int i = 0; i < this->nrPreferinte; ++i) {
+			int lungimePreferinta = this->preferinteMancare[i].length();
+			f.write((char*)(&lungimePreferinta), sizeof(int));
+			f.write(this->preferinteMancare[i].c_str(), lungimePreferinta);
+		}
+		f.write((char*)(&this->buget), sizeof(float));
+	}
+
+	void citesteDinFisierBinar(fstream& f)
+	{
+		f.read((char*)&this->nrMatricol, sizeof(int));
+		int lungimeNume;
+		f.read((char*)&lungimeNume, sizeof(int));
+		f.read((char*)&this->numeStudent, sizeof(lungimeNume));
+		f.read((char*)&this->nrPreferinte, sizeof(int));
+		if (this->preferinteMancare != NULL)
+			delete[] this->preferinteMancare;
+		this->preferinteMancare = new string[this->nrPreferinte];
+		for (int i = 0; i < this->nrPreferinte; i++)
+		{
+			int lungimePreferinta;
+			f.read((char*)&lungimePreferinta, sizeof(int));
+			f.read((char*)&this->preferinteMancare[i], lungimePreferinta);
+		}
+
+		f.read((char*)&this->buget, sizeof(float));
+
+	}
+
+};
+
+int student::nrTotalStudenti = 1;
+int student::nrGenerator = 1000;
+
+class grupa {
+private:
+	int nrStudenti;
+	student* studentGrupa;
+public:
+	grupa()
+	{
+		nrStudenti = 3;
+		studentGrupa = new student[3];
+	}
+	grupa(int nrStudenti, const  student* studentGrupa)
+	{
+		this->nrStudenti = nrStudenti;
+		this->studentGrupa = new student[nrStudenti];
+		for (int i = 0; i < this->nrStudenti; i++)
+			this->studentGrupa[i] = studentGrupa[i];
+	}
+	~grupa()
+	{
+		delete[] studentGrupa;
+	}
+	grupa(const grupa& g) : nrStudenti(g.nrStudenti) {
+		studentGrupa = new student[nrStudenti];
+		for (int i = 0; i < nrStudenti; ++i) {
+			studentGrupa[i] = g.studentGrupa[i];
+		}
+	}
+
+	grupa& operator=(const grupa& g)
+	{
+		if (this != &g)
+		{
+			this->nrStudenti = g.nrStudenti;
+			for (int i = 0; i < nrStudenti; ++i) {
+				this->studentGrupa[i] = g.studentGrupa[i];
+			}
+		}
+		return *this;
+	}
+	student& operator[](int index)
+	{
+		if (index >= 0 && index < this->nrStudenti)
+			return studentGrupa[index];
+	}
+	int getNrStudenti()
+	{
+		return nrStudenti;
+	}
+	student* getStudentGrupa() const {
+		return studentGrupa;
+	}
+	void setNrStudenti(int nr)
+	{
+		this->nrStudenti = nr;
+	}
+	void setStudentGrupa(student* newStudentGrupa) {
+
+		delete[] studentGrupa;
+		studentGrupa = newStudentGrupa;
+	}
+
+	friend ostream& operator<<(ostream& out, const grupa& g)
+	{
+		out << "nr studenti: ";
+		out << g.nrStudenti << endl;
+		for (int i = 0; i < g.nrStudenti; i++)
+		{
+			out << "studentul " << i + 1 << " :";
+			out << g.studentGrupa[i];
+			out << endl;
+		}
+		return out;
+	}
+	friend ofstream& operator<<(ofstream& out, const grupa& g)
+	{
+		out << g.nrStudenti << endl;
+		for (int i = 0; i < g.nrStudenti; i++)
+		{
+			out << g.studentGrupa[i];
+			out << endl;
+		}
+		return out;
+	}
+	friend istream& operator>>(istream& in, grupa& g)
+	{
+		cout << "Nr de studenti din grupa: ";
+		in >> g.nrStudenti;
+		for (int i = 0; i < g.nrStudenti; i++)
+			in >> g.studentGrupa[i];
+		return in;
+	}
+	friend ifstream& operator>>(ifstream& in, grupa& g)
+	{
+		in >> g.nrStudenti;
+		for (int i = 0; i < g.nrStudenti; i++)
+			in >> g.studentGrupa[i];
+		return in;
+	}
+};
+
+
+class bucatarieAbstract
+{
+public:
+	virtual string tipBucatarie() = 0;
+};
+
+
+class bucatarie: public bucatarieAbstract
+{
+private:
+	const int codPostal;
+	string numeCantina;
+	int nrBucatari;
+	static int nrGenerator;
+	int nrMeniuriDisponibile;
+	string* meniuriDisponibile;
+	bool esteDeschisa;
+
+public:
+	bucatarie() :codPostal(nrGenerator++)
+	{
+		this->numeCantina = "Cantina Moxa";
+		this->nrBucatari = 10;
+		this->nrMeniuriDisponibile = 0;
+		this->meniuriDisponibile = NULL;
+		this->esteDeschisa = true;
+	}
+
+	bucatarie(string numeCantina) : codPostal(nrGenerator++)
+	{
+		this->numeCantina = numeCantina;
+		this->nrBucatari = 17;
+		this->nrMeniuriDisponibile = 0;
+		this->meniuriDisponibile = NULL;
+		this->esteDeschisa = false;
+	}
+
+	bucatarie(string numeCantina, int nrBucatari, int nrMeniuriDisponibile, string* meniuriDisponibile, bool esteDeschisa) : codPostal(nrGenerator++)
+	{
+		this->numeCantina = numeCantina;
+		this->nrBucatari = nrBucatari;
+		this->esteDeschisa = esteDeschisa;
+		this->nrMeniuriDisponibile = nrMeniuriDisponibile;
+		this->meniuriDisponibile = new string[nrMeniuriDisponibile];
+		for (int i = 0; i < nrMeniuriDisponibile; i++)
+			this->meniuriDisponibile[i] = meniuriDisponibile[i];
+	}
+
+	~bucatarie()
+	{
+		if (this->meniuriDisponibile != NULL)
+			delete[]this->meniuriDisponibile;
+	}
+
+	const int getCodPostal()
+	{
+		return codPostal;
+	}
+
+	string getNumeCantina()
+	{
+		return numeCantina;
+	}
+
+	int getNrBucatari()
+	{
+		return nrBucatari;
+	}
+
+	static int getNrGenerator()
+	{
+		return nrGenerator;
+	}
+
+	int getNrMeniuriDisponibile()
+	{
+		return nrMeniuriDisponibile;
+	}
+
+	string* getMeniuriDisponibile()
+	{
+		return meniuriDisponibile;
+	}
+
+	bool getEsteDeschisa()
+	{
+		return esteDeschisa;
+	}
+
+	void setNumeCantina(string nume)
+	{
+		this->numeCantina = nume;
+	}
+
+	void setNrBucatari(int buc)
+	{
+		this->nrBucatari = buc;
+	}
+
+	void setNrMeniuriDisponibile(int nr)
+	{
+		this->nrMeniuriDisponibile = nr;
+	}
+
+	void setMeniuriDisponibile(int nr, string* lista)
+	{
+		this->nrMeniuriDisponibile = nr;
+		if (this->meniuriDisponibile != NULL)
+			delete[]this->meniuriDisponibile;
+		this->meniuriDisponibile = new string[nr];
+		for (int i = 0; i < nr; i++)
+			this->meniuriDisponibile[i] = lista[i];
+	}
+
+	void setEsteDeschisa(bool deschis)
+	{
+		this->esteDeschisa = deschis;
+	}
+
+	bucatarie(const bucatarie& b) :codPostal(nrGenerator++)
+	{
+		this->numeCantina = b.numeCantina;
+		this->nrBucatari = b.nrBucatari;
+		this->esteDeschisa = b.esteDeschisa;
+		this->nrMeniuriDisponibile = b.nrMeniuriDisponibile;
+		this->meniuriDisponibile = new string[b.nrMeniuriDisponibile];
+		for (int i = 0; i < b.nrMeniuriDisponibile; i++)
+			this->meniuriDisponibile[i] = b.meniuriDisponibile[i];
+	}
+
+	void afisareBucatarii()
+	{
+		cout << "Bucataria de la " << numeCantina << ", cu codul postal " << codPostal;
+		if (esteDeschisa) cout << " este deschisa astazi ";
+		else cout << " este inchisa astazi ";
+		cout << "si are " << nrBucatari << " bucatari care au pregatit " << nrMeniuriDisponibile << " meniuri: ";
+		if (nrMeniuriDisponibile > 0)
+		{
+			for (int i = 0; i < nrMeniuriDisponibile - 1; i++)
+				cout << meniuriDisponibile[i] << ", ";
+			cout << meniuriDisponibile[nrMeniuriDisponibile - 1];
+		}
+		else cout << "nu sunt disponibile informatii";
+		cout << endl;
+	}
+
+	void adaugaBucatari(int nrBucatariNou)
+	{
+		nrBucatari += nrBucatariNou;
+		cout << "Au fost adaugati " << nrBucatariNou << " bucatari, nr total fiind: " << nrBucatari << " ." << endl;
+	}
+
+	void adaugareMeniuDisponibil(string meniuDisp)
+	{
+		string* aux = new string[this->nrMeniuriDisponibile + 1];
+		for (int i = 0; i < this->nrMeniuriDisponibile; i++)
+			aux[i] = this->meniuriDisponibile[i];
+		aux[nrMeniuriDisponibile] = meniuDisp;
+		this->nrMeniuriDisponibile++;
+		if (this->meniuriDisponibile)
+			delete[] this->meniuriDisponibile;
+		this->meniuriDisponibile = aux;
+	}
+	friend void randamentBucatari(const bucatarie& b, int nr);
+
+	bucatarie& operator=(const bucatarie& b)
+	{
+		if (this != &b)
+		{
+			this->numeCantina = b.numeCantina;
+			this->nrBucatari = b.nrBucatari;
+			this->nrMeniuriDisponibile = b.nrMeniuriDisponibile;
+			this->esteDeschisa = b.esteDeschisa;
+			if (this->meniuriDisponibile != NULL)
+			{
+				delete[]this->meniuriDisponibile;
+			}
+			this->meniuriDisponibile = new string[this->nrMeniuriDisponibile];
+			for (int i = 0; i < this->nrMeniuriDisponibile; i++)
+			{
+				this->meniuriDisponibile[i] = b.meniuriDisponibile[i];
+			}
+		}
+		return *this;
+	}
+
+
+	bucatarie operator!() const
+	{
+		bucatarie aux = *this;
+		aux.esteDeschisa = !aux.esteDeschisa;
+		return aux;
+	}
+
+	bucatarie operator++()
+	{
+		this->nrBucatari++;
+		return *this;
+	}
+
+	bucatarie operator++(int)
+	{
+		bucatarie aux = *this;
+		this->nrBucatari++;
+		return aux;
+	}
+
+	bucatarie operator+=(const bucatarie& b)
+
+	{
+		this->nrBucatari += b.nrBucatari;
+		return *this;
+	}
+	friend istream& operator>>(istream& in, bucatarie& b)
+	{
+		cout << "Numele cantinei: ";
+		in >> b.numeCantina;
+		cout << "Nr bucatari: ";
+		in >> b.nrBucatari;
+		cout << "Nr meniuri disponibile: ";
+		in >> b.nrMeniuriDisponibile;
+		cout << "Meniuri disponibile: ";
+		if (b.meniuriDisponibile != NULL)
+			delete[]b.meniuriDisponibile;
+		b.meniuriDisponibile = new string[b.nrMeniuriDisponibile];
+		for (int i = 0; i < b.nrMeniuriDisponibile; i++)
+			in >> b.meniuriDisponibile[i];
+		cout << "Este deschisa?1-da 0-nu";
+		int x;
+		in >> x;
+		if (x) b.esteDeschisa = true;
+		else b.esteDeschisa = false;
+
+		return in;
+	}
+	friend ostream& operator<<(ostream& out, const bucatarie& b)
+	{
+		out << "Bucataria de la " << b.numeCantina << ", cu codul postal " << b.codPostal;
+		if (b.esteDeschisa) out << " este deschisa astazi ";
+		else out << " este inchisa astazi ";
+		out << "si are " << b.nrBucatari << " bucatari care au pregatit " << b.nrMeniuriDisponibile << " meniuri: ";
+		if (b.nrMeniuriDisponibile > 0)
+		{
+			for (int i = 0; i < b.nrMeniuriDisponibile - 1; i++)
+				cout << b.meniuriDisponibile[i] << ", ";
+			cout << b.meniuriDisponibile[b.nrMeniuriDisponibile - 1];
+		}
+		else cout << "nu sunt disponibile informatii";
+		cout << endl;
+		return out;
+	}
+
+	void scrieInFisierBinar(fstream& f)
+	{
+		f.write((const char*)(&this->codPostal), sizeof(int));
+		int lungimeNumeCantina = this->numeCantina.length();
+		f.write((char*)(&lungimeNumeCantina), sizeof(int));
+		f.write((char*)(&this->numeCantina), sizeof(lungimeNumeCantina));
+		f.write((char*)(&this->nrBucatari), sizeof(int));
+		f.write((char*)(&this->nrMeniuriDisponibile), sizeof(int));
+		for (int i = 0; i < this->nrMeniuriDisponibile; ++i) {
+			int lungimeMeniu = this->meniuriDisponibile[i].length();
+			f.write((char*)(&lungimeMeniu), sizeof(int));
+			f.write((char*)(&this->meniuriDisponibile[i]), sizeof(lungimeMeniu));
+		}
+		f.write((char*)(&this->esteDeschisa), sizeof(bool));
+	}
+
+	void citesteDinFisierBinar(fstream& f) {
+
+		f.read((char*)(&this->codPostal), sizeof(int));
+		int lungimeNumeCantina;
+		f.read((char*)(&lungimeNumeCantina), sizeof(int));
+		f.read((char*)&this->numeCantina, lungimeNumeCantina);
+		f.read((char*)(&this->nrBucatari), sizeof(int));
+		f.read((char*)(&this->nrMeniuriDisponibile), sizeof(int));
+		if (this->meniuriDisponibile != NULL)
+			delete[]this->meniuriDisponibile;
+		this->meniuriDisponibile = new string[this->nrMeniuriDisponibile];
+		for (int i = 0; i < this->nrMeniuriDisponibile; ++i) {
+			int lungimeMeniu;
+			f.read((char*)(&lungimeMeniu), sizeof(int));
+			f.read((char*)&this->meniuriDisponibile[i], lungimeMeniu);
+		}
+		f.read((char*)(&this->esteDeschisa), sizeof(bool));
+	}
+
+	string tipBucatarie()
+	{
+		return "aceasta clasa este o bucatarie";
+	}
+
+};
+
+void randamentBucatari(const bucatarie& b, int nr)
+{
+	int aux = b.nrBucatari * nr;
+	if (aux > b.nrMeniuriDisponibile) cout << "Bucatarii nu pregatesc meniurile suficient de repede.";
+	else cout << "Bucatarii pregatesc meniurile suficient de repede. ";
+
+
+}
+int bucatarie::nrGenerator = 25670;
+
+class restaurant : public bucatarie {
+private:
+	int capacitateMese;
+	bool areMeniuSpecial;
+public:
+	restaurant() : bucatarie("Studentilor", 19, 0, NULL, false)
+	{
+		this->capacitateMese = 10;
+		this->areMeniuSpecial = false;
+	}
+
+	restaurant(string numeCantina, int nrBucatari, int nrMeniuriDisponibile, string* meniuriDisponibile, bool esteDeschisa, int capacitateMese, bool areMeniuSpecial)
+		: bucatarie(numeCantina, nrBucatari, nrMeniuriDisponibile, meniuriDisponibile, esteDeschisa)
+	{
+		this->capacitateMese = capacitateMese;
+		this->areMeniuSpecial = areMeniuSpecial;
+	}
+
+	int getCapacitateMese() const
+	{
+		return capacitateMese;
+	}
+
+	void setCapacitateMese(int capacitate)
+	{
+		capacitateMese = capacitate;
+	}
+
+	bool getAreMeniuSpecial() const
+	{
+		return areMeniuSpecial;
+	}
+
+	void setAreMeniuSpecial(bool areSpecial)
+	{
+		areMeniuSpecial = areSpecial;
+	}
+
+	friend ostream& operator<<(ostream& out, restaurant& r)
+	{
+		out << (bucatarie)r;
+		out << "Are capacitatea de " << r.capacitateMese << " mese si ";
+		if (r.areMeniuSpecial)
+			out << "are meniu special.";
+		else out << "nu are meniu special.";
+		return out;
+	}
+
+	string tipBucatarie()
+	{
+		return "aceasta clasa este un restaurant";
+	}
+
+};
+
+void main()
+{
+	cout << "Afisarea clasei meniu vegetarian, care mosteneste clasa meniu si o clasa virtuala, fisiere text: "<<endl;
+	meniuVegetarian meniuV;
+	ifstream f("fisier.txt", ios::in);
+	f >> meniuV;
+	f.close();
+	cout << meniuV;
+	ofstream g("rezultat.txt", ios::out);
+	g << meniuV;
+	g.close();
+
+	cout << endl<<endl;
+
+	cout << "Relatia de has-a pentru clasele student si grupa: " << endl;
+	student student1;
+	student student2("Costescu Mihai");
+	student2.adaugarePreferinteMancare("Carne de porc");
+	string* preferinte = new string[2];
+	preferinte[0] = "Snitel";
+	preferinte[1] = "Salata";
+	student student3("Grozavescu Dorin", 2, preferinte, 37);
+	grupa grupa1;
+	grupa1[0] = student1;
+	grupa1[1] = student2;
+	grupa1[2] = student3;
+	cout << grupa1;
+
+	cout << endl;
+
+	cout << "Afisare relatie is-a pentru bucatarie si restaurant si get-eri si set-eri pt mostenire." << endl;
+	restaurant restaurant1("Moxa", 20, 1, new string[1]{ "Lasagna" }, true, 10, false);
+	cout << restaurant1;
+	restaurant1.setAreMeniuSpecial(true);
+	restaurant1.setCapacitateMese(30);
+	cout << endl;
+	cout <<"Capacitate mese:"<< restaurant1.getCapacitateMese() << endl;
+	if (restaurant1.getAreMeniuSpecial()) cout << "are meniu special";
+	else cout << "nu are meniu special";
+
+	cout << endl<<endl;
+
+	cout << "Clasa abstracta: " << endl;
+	meniuAbstract* m1 = new meniu();
+	meniuAbstract* m2 = new meniuVegetarian();
+	cout << m1->tipMeniu() << endl;
+	cout << m2->tipMeniu() << endl;
+
+	bucatarieAbstract* b1 = new bucatarie();
+	bucatarieAbstract* b2 = new restaurant();
+	cout << b1->tipBucatarie() << endl;
+	cout << b2->tipBucatarie() << endl;
+
+}
+
